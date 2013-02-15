@@ -1,0 +1,10 @@
+ShibUserPassAuth {
+
+<% @mods.each do |name,mod| -%>
+  <%= mod[:module] %> sufficient
+  <% mod.each do |key, value| -%>
+    <%= key %>="<%= value %>"
+  <% end -%>;
+<% end -%>
+
+};

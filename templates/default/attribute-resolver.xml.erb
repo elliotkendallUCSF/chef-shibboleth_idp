@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    This file is an EXAMPLE configuration file.  While the configuration presented in this 
+    example file is functional, it isn't very interesting.  However, there are lots of example
+    attributes, encoders, and a couple example data connectors.
+    
+    Not all attribute definitions, data connectors, or principal connectors are demonstrated.
+    Deployers should refer to the Shibboleth 2 documentation for a complete list of components 
+    and their options.
+-->
+<resolver:AttributeResolver xmlns:resolver="urn:mace:shibboleth:2.0:resolver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                            xmlns:pc="urn:mace:shibboleth:2.0:resolver:pc" xmlns:ad="urn:mace:shibboleth:2.0:resolver:ad" 
+                            xmlns:dc="urn:mace:shibboleth:2.0:resolver:dc" xmlns:enc="urn:mace:shibboleth:2.0:attribute:encoder" 
+                            xmlns:sec="urn:mace:shibboleth:2.0:security" 
+                            xsi:schemaLocation="urn:mace:shibboleth:2.0:resolver classpath:/schema/shibboleth-2.0-attribute-resolver.xsd
+                                               urn:mace:shibboleth:2.0:resolver:pc classpath:/schema/shibboleth-2.0-attribute-resolver-pc.xsd
+                                               urn:mace:shibboleth:2.0:resolver:ad classpath:/schema/shibboleth-2.0-attribute-resolver-ad.xsd
+                                               urn:mace:shibboleth:2.0:resolver:dc classpath:/schema/shibboleth-2.0-attribute-resolver-dc.xsd
+                                               urn:mace:shibboleth:2.0:attribute:encoder classpath:/schema/shibboleth-2.0-attribute-encoder.xsd
+                                               urn:mace:shibboleth:2.0:security classpath:/schema/shibboleth-2.0-security.xsd">
+
+    <!-- ========================================== -->
+    <!--      Attribute Definitions                 -->
+    <!-- ========================================== -->
+
+  <% @attributes.each do |key,value| -%>
+    <resolver:AttributeDefinition id="<%= key %>"
+    <% if value.has_key?('type') -%>
+      xsi:type="<%= value['type'] %>"
+    <% else -%>
+      xsi:type="ad:Simple"
+    <% end -%>
+    <% if value.has_key?('scope') -%>
+      scope="<%= value['scope'] %>"
+    <% end -%>
+    <% if value.has_key?('source_attribute')
+         if value['source_attribute'] != false -%>
+      sourceAttributeID="<%= value['source_attribute'] %>"
+      <% end -%>
+    <% else -%>
+      sourceAttributeID="<%= key %>"
+    <% end -%>
+    >
+    <% if value.has_key?("dependencies")
+       value["dependencies"].each do |dependency|
+    -%>
+    <resolver:Dependency ref="<%= dependency %>" />
+    <% end
+     end
+    -%>
+    <% if value.has_key?('resolver')
+         if value['resolver'] != false -%>
+      <resolver:Dependency ref="<%= value['resolver'] %>" />
+    <%   end
+       else -%>
+      <resolver:Dependency ref="<%= node["shibboleth_idp"]["default_resolver"] %>" />
+    <% end -%>
+    <% [ 'SAML1String', 'SAML1ScopedString', 'SAML1XMLObject' ].each do |encoder|
+         if value.has_key?(encoder) %>
+      <resolver:AttributeEncoder xsi:type="enc:<%= encoder %>"
+        name="<%= value[encoder] %>" />
+    <%   end
+       end -%>
+    <% [ 'SAML2String', 'SAML2ScopedString', 'SAML2XMLObject' ].each do |encoder|
+         if value.has_key?(encoder) %>
+      <resolver:AttributeEncoder xsi:type="enc:<%= encoder %>"
+        name="<%= value[encoder] %>" friendlyName="<%= key %>" />
+    <%   end
+       end -%>
+    <% [ 'SAML1StringNameIdentifier', 'SAML2StringNameID' ].each do |encoder|
+         if value.has_key?(encoder) %>
+      <resolver:AttributeEncoder xsi:type="enc:<%= encoder %>"
+        nameFormat="<%= value[encoder] %>" />
+    <%   end
+       end -%>
+    <% if value.has_key?('valuemap_default') -%>
+      <ad:DefaultValue><%= value['valuemap_default'] %></ad:DefaultValue>
+    <% end -%>
+    <% if value.has_key?('valuemaps')
+         value['valuemaps'].each do |result,sourcevalues| -%>
+      <ad:ValueMap>
+          <ad:ReturnValue><%= result %></ad:ReturnValue>
+            <% sourcevalues.each do |sourcevalue| -%>
+          <ad:SourceValue><%= sourcevalue %></ad:SourceValue>
+            <% end -%>
+      </ad:ValueMap>
+    <%   end
+       end -%>
+    <% if value.has_key?('script') -%>
+      <ad:ScriptFile><%= node["shibboleth_idp"]["home"] %>/conf/<%= value['script'] %></ad:ScriptFile>
+    <% end -%>
+    </resolver:AttributeDefinition>
+
+  <% end -%>
+
+    <!-- ========================================== -->
+    <!--      Data Connectors                       -->
+    <!-- ========================================== -->
+
+  <% @staticresolvers.each do |resolver,attribute| -%>
+    <resolver:DataConnector id="<%= resolver %>" xsi:type="dc:Static">
+      <% attribute.each do |key,values| -%>
+      <dc:Attribute id="<%= key %>">
+        <% values.each do |value| -%>
+        <dc:Value><%= value %></dc:Value>
+        <% end -%>
+      </dc:Attribute>
+      <% end -%>
+    </resolver:DataConnector>
+
+  <% end -%>
+
+    <!-- Example Relational Database Connector -->
+    <!--
+    <resolver:DataConnector id="mySIS" xsi:type="dc:RelationalDatabase">
+        <dc:ApplicationManagedConnection jdbcDriver="oracle.jdbc.driver.OracleDriver"
+                                         jdbcURL="jdbc:oracle:thin:@db.example.org:1521:SomeDB" 
+                                         jdbcUserName="myid" 
+                                         jdbcPassword="mypassword" />
+        <dc:QueryTemplate>
+            <![CDATA[
+                SELECT * FROM student WHERE gzbtpid = '$requestContext.principalName'
+            ]]>
+        </dc:QueryTemplate>
+
+        <dc:Column columnName="gzbtpid" attributeID="uid" />
+        <dc:Column columnName="fqlft" attributeID="gpa" type="Float" />
+    </resolver:DataConnector>
+     -->
+
+  <% @ldapresolvers.each do |key,value| -%>
+    <resolver:DataConnector id="<%= key %>" xsi:type="dc:LDAPDirectory"
+      <% value["attributes"].each do |attr,aval| -%>
+        <%= attr %>="<%= aval %>"
+      <% end -%>
+      >
+      <% if value.has_key?("dependencies")
+           value["dependencies"].each do |dependency|
+      -%>
+        <resolver:Dependency ref="<%= dependency %>" />
+      <%   end
+         end
+      -%>
+        <dc:FilterTemplate>
+            <![CDATA[
+                <%= value["filter_template"] %>
+            ]]>
+        </dc:FilterTemplate>
+      <% if value.has_key?("return_attributes") -%>
+        <dc:ReturnAttributes><%= value["return_attributes"] %></dc:ReturnAttributes>
+      <% end -%>
+    </resolver:DataConnector>
+
+  <% end -%>
+  
+  <% @computedresolvers.each do |resolver,attributes| -%>
+    <resolver:DataConnector xsi:type="dc:ComputedId"
+      id="<%= resolver %>"
+      generatedAttributeID="<%= resolver %>"
+      sourceAttributeID="<%= attributes['source_attribute'] %>"
+      salt="<%= attributes['salt'] %>">
+      <% attributes['dependencies'].each do |dependency| -%>
+        <resolver:Dependency ref="<%= dependency %>" />
+      <% end -%>
+    </resolver:DataConnector>
+
+  <% end -%>
+
+    <!-- ========================================== -->
+    <!--      Principal Connectors                  -->
+    <!-- ========================================== -->
+    <resolver:PrincipalConnector xsi:type="pc:Transient" id="shibTransient" nameIDFormat="urn:mace:shibboleth:1.0:nameIdentifier"/>
+    <resolver:PrincipalConnector xsi:type="pc:Transient" id="saml1Unspec" nameIDFormat="urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"/>
+    <resolver:PrincipalConnector xsi:type="pc:Transient" id="saml2Transient" nameIDFormat="urn:oasis:names:tc:SAML:2.0:nameid-format:transient"/>
+
+</resolver:AttributeResolver>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<afp:AttributeFilterPolicyGroup id="ShibbolethFilterPolicy"
+                                xmlns:afp="urn:mace:shibboleth:2.0:afp" xmlns:basic="urn:mace:shibboleth:2.0:afp:mf:basic" 
+                                xmlns:saml="urn:mace:shibboleth:2.0:afp:mf:saml" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+                                xsi:schemaLocation="urn:mace:shibboleth:2.0:afp classpath:/schema/shibboleth-2.0-afp.xsd
+                                                    urn:mace:shibboleth:2.0:afp:mf:basic classpath:/schema/shibboleth-2.0-afp-mf-basic.xsd
+                                                    urn:mace:shibboleth:2.0:afp:mf:saml classpath:/schema/shibboleth-2.0-afp-mf-saml.xsd">
+
+    <!--  Release the transient ID to anyone -->
+    <afp:AttributeFilterPolicy id="releaseTransientIdToAnyone">
+        <afp:PolicyRequirementRule xsi:type="basic:ANY"/>
+
+        <afp:AttributeRule attributeID="transientId">
+            <afp:PermitValueRule xsi:type="basic:ANY"/>
+        </afp:AttributeRule>
+
+    </afp:AttributeFilterPolicy>
+
+  <%
+     i = 0
+     @release.each do |item|
+       i = i + 1
+  -%>
+    <afp:AttributeFilterPolicy id="<%= i %>">
+    <% if item.has_key?('attribute_filter') -%>
+      <afp:PolicyRequirementRule xsi:type="basic:AND">
+    <%
+         ruletype = "basic:Rule"
+       else
+         ruletype = "afp:PolicyRequirementRule"
+       end
+       
+    -%>
+    <% if item['entityids'].count == 1 -%>
+      <<%= ruletype %> xsi:type="basic:AttributeRequesterString"   
+        value="<%= item['entityids'].first %>" />
+    <% else -%>
+      <<%= ruletype %> xsi:type="basic:OR">
+        <% item['entityids'].each do |entityid| -%>
+          <basic:Rule xsi:type="basic:AttributeRequesterString" value="<%= entityid %>" />
+        <% end -%>
+      </<%= ruletype %>>
+    <% end -%>
+    <% if item.has_key?('attribute_filter') -%>
+      <% item['attribute_filter'].each do |attribute,values| -%>
+        <%
+           if attribute.start_with?('!')
+             attribute = attribute.sub('!', '')
+             negation = true
+           else
+             negation = false
+           end
+        -%>
+        <% if negation == true -%>
+          <basic:Rule xsi:type="basic:NOT">
+        <% end -%>
+        <% if values.count == 1 -%>
+          <basic:Rule xsi:type="basic:AttributeValueString"
+            attributeID="<%= attribute %>" value="<%= values.first %>"
+            ignoreCase="true" />
+        <% else -%>
+          <basic:Rule xsi:type="basic:OR">
+          <% values.each do |value| -%>
+            <basic:Rule xsi:type="basic:AttributeValueString"
+              attributeID="<%= attribute %>" value="<%= value %>"
+              ignoreCase="true" />
+          <% end -%>
+          </basic:Rule>
+        <% end -%>
+        <% if negation == true -%>
+          </basic:Rule>
+        <% end -%>
+      <% end -%>
+      </afp:PolicyRequirementRule>
+    <% end -%>
+    <% item['attributes'].each do |attribute| -%>
+      <afp:AttributeRule attributeID="<%= attribute -%>">
+        <afp:PermitValueRule xsi:type="basic:ANY" />
+      </afp:AttributeRule>
+    <% end -%>
+    </afp:AttributeFilterPolicy>
+
+  <% end -%>
+
+</afp:AttributeFilterPolicyGroup>
