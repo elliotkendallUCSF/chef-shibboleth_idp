@@ -57,13 +57,13 @@ load.  The libraries for these servlets must be listed in extra_libraries.
 For example, to configure the Duo Security two-factor login handler, your
 config might look like this:
 
-      "extra_servlets": {
-        "TwoFactorLoginHandler": {
-          "class": "com.duosecurity.shibboleth.idp.twofactor.TwoFactorLoginServlet",
-          "load_on_startup": "4",
-          "url_pattern": "/Authn/DuoUserPassword"
-        }
+    "extra_servlets": {
+      "TwoFactorLoginHandler": {
+        "class": "com.duosecurity.shibboleth.idp.twofactor.TwoFactorLoginServlet",
+        "load_on_startup": "4",
+        "url_pattern": "/Authn/DuoUserPassword"
       }
+    }
 
 * `node['shibboleth']['extra_docs']` - A list of documents (HTML, JSP, CSS,
 JS, etc.) to include at the root of the idp.war file.  Each file listed here
@@ -130,101 +130,101 @@ and define at least one each of `metadata_directories`/`remote_metadata`,
 
 Here is an example node configuration:
 
-{
-  "name": "shibboleth-idp",
-  ...
-  "run_list": [
-    ...
-    "recipe[tomcat]",
-    "recipe[shibboleth-idp]"
-  ],
-  "override_attributes": {
-    ...
-    "shibboleth_idp": {
-      "session_lifetime": "7200000",
-      "trust_certificates": {
-        "foo": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
-      },
-      "metadata_directories": [
-        "/opt/shibboleth-metadata"
+    {
+      "name": "shibboleth-idp",
+      ...
+      "run_list": [
+        ...
+        "recipe[tomcat]",
+        "recipe[shibboleth-idp]"
       ],
-      "default_resolver": "myLDAP",
-      "ldap_resolvers": {
-        "myLDAP": {
-          "attributes": {
-            "ldapURL": "ldaps://ldap.foo.com:636",
-            "baseDN": "dc=foo,dc=com",
-            "principal": "uid=shibboleth",
-            "principalCredential": "not a real password"
+      "override_attributes": {
+        ...
+        "shibboleth_idp": {
+          "session_lifetime": "7200000",
+          "trust_certificates": {
+            "foo": "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----\n"
           },
-          "filter_template": "(uid=$requestContext.principalName)",
-          "return_attributes": "uid displayName mail sn givenName"
-        }
-      },
-      "static_resolvers": {
-        "staticAttributes": {
-          "isAwesome": [ "yes" ]
-        }
-      },
-      "computed_resolvers": {
-        "computedID": {
-          "source_attribute": "uid",
-          "salt": "never put salt in your eyes",
-          "dependencies": [ "myLDAP" ]
-        }
-      },
-      "remote_metadata": {
-        "incommon": "http://wayf.incommonfederation.org/InCommon/InCommon-metadata.xml"
-      },
-      "login_modules": [
-        {
-          "module": "edu.vt.middleware.ldap.jaas.LdapLoginModule",
-          "host": "ldap.foo.com",
-          "port": "636",
-          "base": "ou=users,dc=foo,dc=com",
-          "serviceUser": "uid=shibboleth,dc=ucsf,dc=edu",
-          "serviceCredential": "not a real password",
-          "userField": "uid"
-        }
-      ],
-      "attributes": {
-        "eduPersonPrincipalName": {
-          "type": "ad:Scoped",
-          "scope": "foo.com",
-          "source_attribute": "uid",
-          "SAML1ScopedString": "urn:mace:dir:attribute-def:eduPersonPrincipalName",
-          "SAML2ScopedString": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"
-        },
-        "isAwesome": {
-          "resolver": "staticAttributes",
-          "SAML1String": "urn:mace:dir:attribute-def:isAwesome",
-          "SAML2String": "urn:mace:dir:attribute-def:isAwesome"
-        },
-        "transientId": {
-          "type": "ad:TransientId",
-          "resolver": false,
-          "SAML1StringNameIdentifier": "urn:mace:shibboleth:1.0:nameIdentifier",
-          "SAML2StringNameID": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
-        }
-      },
-      "relying_parties": [
-        {
-          "entityids": [
-            "https://sp1a.foo.com/",
-            "https://sp1b.foo.com/"
+          "metadata_directories": [
+            "/opt/shibboleth-metadata"
           ],
-          "provider": "https://idp2.foo.com/idp/shibboleth",
-          "attributes": [ "eduPersonPrincipalName" ]
+          "default_resolver": "myLDAP",
+          "ldap_resolvers": {
+            "myLDAP": {
+              "attributes": {
+                "ldapURL": "ldaps://ldap.foo.com:636",
+                "baseDN": "dc=foo,dc=com",
+                "principal": "uid=shibboleth",
+                "principalCredential": "not a real password"
+              },
+              "filter_template": "(uid=$requestContext.principalName)",
+              "return_attributes": "uid displayName mail sn givenName"
+            }
+          },
+          "static_resolvers": {
+            "staticAttributes": {
+              "isAwesome": [ "yes" ]
+            }
+          },
+          "computed_resolvers": {
+            "computedID": {
+              "source_attribute": "uid",
+              "salt": "never put salt in your eyes",
+              "dependencies": [ "myLDAP" ]
+            }
+          },
+          "remote_metadata": {
+            "incommon": "http://wayf.incommonfederation.org/InCommon/InCommon-metadata.xml"
+          },
+          "login_modules": [
+            {
+              "module": "edu.vt.middleware.ldap.jaas.LdapLoginModule",
+              "host": "ldap.foo.com",
+              "port": "636",
+              "base": "ou=users,dc=foo,dc=com",
+              "serviceUser": "uid=shibboleth,dc=ucsf,dc=edu",
+              "serviceCredential": "not a real password",
+              "userField": "uid"
+            }
+          ],
+          "attributes": {
+            "eduPersonPrincipalName": {
+              "type": "ad:Scoped",
+              "scope": "foo.com",
+              "source_attribute": "uid",
+              "SAML1ScopedString": "urn:mace:dir:attribute-def:eduPersonPrincipalName",
+              "SAML2ScopedString": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"
+            },
+            "isAwesome": {
+              "resolver": "staticAttributes",
+              "SAML1String": "urn:mace:dir:attribute-def:isAwesome",
+              "SAML2String": "urn:mace:dir:attribute-def:isAwesome"
+            },
+            "transientId": {
+              "type": "ad:TransientId",
+              "resolver": false,
+              "SAML1StringNameIdentifier": "urn:mace:shibboleth:1.0:nameIdentifier",
+              "SAML2StringNameID": "urn:oasis:names:tc:SAML:2.0:nameid-format:transient"
+            }
+          },
+          "relying_parties": [
+            {
+              "entityids": [
+                "https://sp1a.foo.com/",
+                "https://sp1b.foo.com/"
+              ],
+              "provider": "https://idp2.foo.com/idp/shibboleth",
+              "attributes": [ "eduPersonPrincipalName" ]
+            },
+            {
+              "entityids": [ "https://sp2.foo.com/" ],
+              "attributes": [ "eduPersonPrincipalName", "surname", "givenName",
+                "displayName", "email" ]
+            }
+          ]
         }
-        {
-          "entityids": [ "https://sp2.foo.com/" ],
-          "attributes": [ "eduPersonPrincipalName", "surname", "givenName",
-            "displayName", "email" ]
-        }
-      ]
+      }
     }
-  }
-}
 
 License and Author
 ==================
