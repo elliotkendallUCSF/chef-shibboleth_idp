@@ -11,6 +11,8 @@ default["shibboleth_idp"]["home"] = "/opt/shibboleth-idp"
 default["shibboleth_idp"]["domain"] = "idp.example.org"
 default["shibboleth_idp"]["keystore_password"] = "badpass"
 default["shibboleth_idp"]["override_providers"] = []
+default["shibboleth_idp"]["relying_parties"] = []
+default["shibboleth_idp"]["metadata_directories"] = []
 
 default["shibboleth_idp"]["loggers"]["edu.internet2.middleware.shibboleth"] = "INFO"
 default["shibboleth_idp"]["loggers"]["org.opensaml"] = "WARN"
@@ -25,6 +27,7 @@ default["shibboleth_idp"]["profile_handler_namespaces"] = {
 }
 default["shibboleth_idp"]["extra_servlets"] = {}
 default["shibboleth_idp"]["extra_libraries"] = []
+default["shibboleth_idp"]["extra_login_handlers"] = {}
 default["shibboleth_idp"]["extra_webapp_libraries"] = []
 default["shibboleth_idp"]["extra_docs"] = []
 default["shibboleth_idp"]["login_modules"] = {}

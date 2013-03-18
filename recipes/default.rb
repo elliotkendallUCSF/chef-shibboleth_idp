@@ -12,7 +12,7 @@ bash "run_installer" do
   cwd node['shibboleth_idp']["installer_dir"]
   code <<-EOH
     rm -rf "#{node['shibboleth_idp']['home']}"
-    umask 0022 && echo -e "#{node['shibboleth_idp']["home"]}\n#{node['shibboleth_idp']["domain"]}\n#{node['shibboleth_idp']["keystore_pass"]}\n" \
+    umask 0022 && echo -e "#{node['shibboleth_idp']["home"]}\n#{node['shibboleth_idp']["domain"]}\n#{node['shibboleth_idp']["keystore_password"]}\n" \
      | JAVA_HOME=#{node['java']['java_home']} "#{node['shibboleth_idp']["installer_dir"]}/install.sh"
     EOH
 end
