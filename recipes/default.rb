@@ -153,5 +153,14 @@ node["shibboleth_idp"]["trust_certificates"].each do |name,cert|
   end
 end
 
-# TODO - Place a link to servet jar file in Shibboleth lib directory to
-# allow for use of aacli.sh
+# Place a link to servet jar file in Shibboleth lib directory to allow for
+# use of aacli.sh
+puts "***************"
+puts "#{node['tomcat']['home']}/lib/*servlet*api*.jar"
+puts "***************"
+Dir.glob("#{node['tomcat']['home']}/lib/*servlet*api*.jar").each do|f|
+  link "#{node['shibboleth_idp']['home']}/lib/servlet-api.jar" do
+    to "#{f}"
+  end
+  break
+end
