@@ -27,7 +27,12 @@ default["shibboleth_idp"]["profile_handler_namespaces"] = {
 }
 default["shibboleth_idp"]["extra_servlets"] = {}
 default["shibboleth_idp"]["extra_libraries"] = []
-default["shibboleth_idp"]["extra_login_handlers"] = {}
+default["shibboleth_idp"]["login_handlers"] = {
+  "ph:UsernamePassword" => {
+    "authentication_method" => "urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport",
+    "attrs" => {}
+  }
+}
 default["shibboleth_idp"]["extra_webapp_libraries"] = []
 default["shibboleth_idp"]["extra_docs"] = []
 default["shibboleth_idp"]["login_modules"] = {}

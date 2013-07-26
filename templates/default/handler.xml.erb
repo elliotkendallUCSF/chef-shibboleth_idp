@@ -101,12 +101,14 @@
     -->
     
     <!--  Username/password login handler -->
+    <!--
     <ph:LoginHandler xsi:type="ph:UsernamePassword" 
                   jaasConfigurationLocation="file://<%= node["shibboleth_idp"]["home"] %>/conf/login.config">
         <ph:AuthenticationMethod>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</ph:AuthenticationMethod>
     </ph:LoginHandler>
+    -->
 
-<% node['shibboleth_idp']['extra_login_handlers'].each do |name,conf| -%>
+<% node['shibboleth_idp']['login_handlers'].each do |name,conf| -%>
     <ph:LoginHandler xsi:type="<%= name %>" 
       jaasConfigurationLocation="file://<%= node["shibboleth_idp"]["home"] %>/conf/login.config"
       <% conf['attrs'].each do |attr,val| -%>
