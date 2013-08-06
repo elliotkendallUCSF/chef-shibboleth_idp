@@ -74,7 +74,8 @@ to add to the idp.war file. Each file listed here must also be added to
 files/default/
 
 * `node['shibboleth']['session_lifetime']` - How long an IdP session lasts,
-in milliseconds.  Defaults to 1800000, or 30 minutes.
+in milliseconds.  Defaults to 1800000, or 30 minutes.  Remember also to up
+the validity of your login handler(s).
 
 * `node['shibboleth']['attributes']` - Data structure defining attributes. 
 Defaults to the same set as regular Shibboleth.  See the example below for
@@ -193,7 +194,8 @@ Here is an example node configuration:
               "scope": "foo.com",
               "source_attribute": "uid",
               "SAML1ScopedString": "urn:mace:dir:attribute-def:eduPersonPrincipalName",
-              "SAML2ScopedString": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"
+              "SAML2ScopedString": "urn:oid:1.3.6.1.4.1.5923.1.1.1.6",
+              "friendlyName": "ePPN"
             },
             "isAwesome": {
               "resolver": "staticAttributes",
@@ -219,7 +221,16 @@ Here is an example node configuration:
             {
               "entityids": [ "https://sp2.foo.com/" ],
               "attributes": [ "eduPersonPrincipalName", "surname", "givenName",
-                "displayName", "email" ]
+                "displayName", "email" ],
+              "profile_configuration": {
+                "SAML2SSOProfile": {
+                  "encryptAssertions": "never"
+                }
+              }
+            }, 
+            {
+              "groupids": [ "urn:mace:incommon" ],
+              "attributes": [ "eduPersonPrincipalName" ]
             }
           ]
         }
