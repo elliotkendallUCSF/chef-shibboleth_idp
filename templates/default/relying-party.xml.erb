@@ -22,14 +22,14 @@
     <!--      Relying Party Configurations          -->
     <!-- ========================================== -->
     <% if node["shibboleth_idp"].has_key?("default_provider")
-         provider = node["shibboleth_idp"]["default_provider"]
+         defprovider = node["shibboleth_idp"]["default_provider"]
        else
-         provider = "https://" + node["shibboleth_idp"]["domain"] + "/idp/shibboleth"
+         defprovider = "https://" + node["shibboleth_idp"]["domain"] + "/idp/shibboleth"
        end
      -%>
-    <rp:AnonymousRelyingParty provider="<%= provider %>" defaultSigningCredentialRef="IdPCredential"/>
+    <rp:AnonymousRelyingParty provider="<%= defprovider %>" defaultSigningCredentialRef="IdPCredential"/>
     
-    <rp:DefaultRelyingParty provider="<%= provider %>" defaultSigningCredentialRef="IdPCredential">
+    <rp:DefaultRelyingParty provider="<%= defprovider %>" defaultSigningCredentialRef="IdPCredential">
         <!-- 
             Each attribute in these profiles configuration is set to its default value,
             that is, the values that would be in effect if those attributes were not present.
@@ -69,18 +69,33 @@
     <% @relyingparties.each do |rp|
          if rp.has_key?("provider") and node["shibboleth_idp"]["override_providers"].include?(rp["provider"])
            provider = rp["provider"]
-           rp["entityids"].each do |entityid|
+           pconf = {
+             "SAML2SSOProfile" => {},
+             "ShibbolethSSOProfile" => {},
+             "SAML1AttributeQueryProfile" => {},
+             "SAML1ArtifactResolutionProfile" => {}
+           }
+         elsif rp.has_key?("profile_configuration")
+           provider = defprovider
+           pconf = rp["profile_configuration"]
+         else
+           next
+         end
+
+         rp["entityids"].each do |entityid|
     -%>
     <rp:RelyingParty id="<%= entityid %>"
      provider="<%= provider %>"
      defaultSigningCredentialRef="IdPCredential">
-      <rp:ProfileConfiguration xsi:type="saml:SAML2SSOProfile"/>
-      <rp:ProfileConfiguration xsi:type="saml:ShibbolethSSOProfile"/>
-      <rp:ProfileConfiguration xsi:type="saml:SAML1AttributeQueryProfile"/>
-      <rp:ProfileConfiguration xsi:type="saml:SAML1ArtifactResolutionProfile"/>
+      <% pconf.each do |profile, conf| -%>
+        <rp:ProfileConfiguration xsi:type="saml:<%= profile %>"
+        <% conf.each do |key, value| -%>
+          <%= key %>="<%= value %>"
+        <% end -%>
+        />
+      <% end -%>
     </rp:RelyingParty>
-    <%     end
-         end
+    <%   end
        end -%>
     
     <!-- ========================================== -->
@@ -96,7 +111,7 @@
 
       <% @remotemetadata.each do |name,url| -%>
         <metadata:MetadataProvider xsi:type="FileBackedHTTPMetadataProvider" xmlns="urn:mace:shibboleth:2.0:metadata"
-          id="<%= name %>"
+          id="_<%= name %>"
           metadataURL="<%= url %>"
           backingFile="<%= node["shibboleth_idp"]["home"] %>/metadata/<%= name %>-metadata.xml">
         </metadata:MetadataProvider>
@@ -107,7 +122,7 @@
              next if not file =~ /.*\.xml$/
         -%>
         <metadata:MetadataProvider xsi:type="FilesystemMetadataProvider" xmlns="urn:mace:shibboleth:2.0:metadata"
-            id="<%= File.basename(file, ".xml") %>"
+            id="_<%= File.basename(file, ".xml") %>"
             metadataFile="<%= dir %>/<%= file %>" />
         <% end -%>
       <% end -%>
