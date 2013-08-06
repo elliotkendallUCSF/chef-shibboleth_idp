@@ -25,11 +25,24 @@
 
   <% @attributes.each do |key,value| -%>
     <resolver:AttributeDefinition id="<%= key %>"
-    <% if value.has_key?('type') -%>
-      xsi:type="<%= value['type'] %>"
-    <% else -%>
-      xsi:type="ad:Simple"
-    <% end -%>
+    <% if value.has_key?('friendlyName')
+         friendlyName = value['friendlyName']
+       elsif value.has_key?('source_attribute')
+         friendlyName = value['source_attribute']
+       else
+         friendlyName = key
+       end
+
+       if not value.has_key?('type')
+         value['type'] = 'Simple'
+       end
+
+       if ['Script', 'PrincipalName', 'TransientId'].include?(value['type'])
+         value['resolver'] = false
+         value['source_attribute'] = false
+       end
+    -%>
+      xsi:type="ad:<%= value['type'] %>"
     <% if value.has_key?('scope') -%>
       scope="<%= value['scope'] %>"
     <% end -%>
@@ -64,7 +77,7 @@
     <% [ 'SAML2String', 'SAML2ScopedString', 'SAML2XMLObject' ].each do |encoder|
          if value.has_key?(encoder) %>
       <resolver:AttributeEncoder xsi:type="enc:<%= encoder %>"
-        name="<%= value[encoder] %>" friendlyName="<%= key %>" />
+        name="<%= value[encoder] %>" friendlyName="<%= friendlyName %>" />
     <%   end
        end -%>
     <% [ 'SAML1StringNameIdentifier', 'SAML2StringNameID' ].each do |encoder|
