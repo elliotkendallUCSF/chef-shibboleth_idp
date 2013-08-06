@@ -69,6 +69,7 @@ default["shibboleth_idp"]["attributes"] = {
   "employeeType" => {"SAML1String" => "urn:mace:dir:attribute-def:employeeType", "SAML2String" => "urn:oid:2.16.840.1.113730.3.1.4"},
   "jpegPhoto" => {"SAML1String" => "urn:mace:dir:attribute-def:jpegPhoto", "SAML2String" => "urn:oid:0.9.2342.19200300.100.1.60"},
   "preferredLanguage" => {"SAML1String" => "urn:mace:dir:attribute-def:preferredLanguage", "SAML2String" => "urn:oid:2.16.840.1.113730.3.1.39"},
+  "eduPersonPrincipalName" => {"SAML1ScopedString" => "urn:mace:dir:attribute-def:eduPersonPrincipalName", "SAML2ScopedString" => "urn:oid:1.3.6.1.4.1.5923.1.1.1.6"},
   "eduPersonAffiliation" => {"SAML1String" => "urn:mace:dir:attribute-def:eduPersonAffiliation", "SAML2String" => "urn:oid:1.3.6.1.4.1.5923.1.1.1.1"},
   "eduPersonEntitlement" => {"SAML1String" => "urn:mace:dir:attribute-def:eduPersonEntitlement", "SAML2String" => "urn:oid:1.3.6.1.4.1.5923.1.1.1.7"},
   "eduPersonNickname" => {"SAML1String" => "urn:mace:dir:attribute-def:eduPersonNickname", "SAML2String" => "urn:oid:1.3.6.1.4.1.5923.1.1.1.2"},
