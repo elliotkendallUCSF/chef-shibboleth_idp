@@ -7,6 +7,7 @@
                                                     urn:mace:shibboleth:2.0:afp:mf:saml classpath:/schema/shibboleth-2.0-afp-mf-saml.xsd">
 
     <!--  Release the transient ID to anyone -->
+    <!--
     <afp:AttributeFilterPolicy id="releaseTransientIdToAnyone">
         <afp:PolicyRequirementRule xsi:type="basic:ANY"/>
 
@@ -15,6 +16,7 @@
         </afp:AttributeRule>
 
     </afp:AttributeFilterPolicy>
+    -->
 
   <%
      i = 0
@@ -29,18 +31,34 @@
        else
          ruletype = "afp:PolicyRequirementRule"
        end
-       
+
+       itemcount = 0
+       if item.has_key?('entityids')
+         itemcount = itemcount + item['entityids'].count
+       else
+         item['entityids'] = []
+       end
+       if item.has_key?('groupids')
+         itemcount = itemcount + item['groupids'].count
+       else
+         item['groupids'] = []
+       end
     -%>
-    <% if item['entityids'].count == 1 -%>
-      <<%= ruletype %> xsi:type="basic:AttributeRequesterString"   
-        value="<%= item['entityids'].first %>" />
-    <% else -%>
+    <% if itemcount > 1 -%>
       <<%= ruletype %> xsi:type="basic:OR">
-        <% item['entityids'].each do |entityid| -%>
-          <basic:Rule xsi:type="basic:AttributeRequesterString" value="<%= entityid %>" />
-        <% end -%>
-      </<%= ruletype %>>
+    <%   origruletype = ruletype
+         ruletype = "basic:Rule"
+       end -%>
+      <% item['groupids'].each do |groupid| -%>
+        <<%= ruletype %> xsi:type="saml:AttributeRequesterInEntityGroup" groupID="<%= groupid %>" />
+      <% end -%>
+      <% item['entityids'].each do |entityid| -%>
+        <<%= ruletype %> xsi:type="basic:AttributeRequesterString" value="<%= entityid %>" />
+      <% end -%>
+    <% if itemcount > 1 -%>
+      </<%= origruletype %>>
     <% end -%>
+
     <% if item.has_key?('attribute_filter') -%>
       <% item['attribute_filter'].each do |attribute,values| -%>
         <%
