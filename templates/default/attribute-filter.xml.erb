@@ -24,7 +24,9 @@
        i = i + 1
   -%>
     <afp:AttributeFilterPolicy id="<%= i %>">
-    <% if item.has_key?('attribute_filter') -%>
+    <% if item.has_key?('attribute_filter') \
+        or item.has_key?('exclude_entityids')
+    -%>
       <afp:PolicyRequirementRule xsi:type="basic:AND">
     <%
          ruletype = "basic:Rule"
@@ -89,6 +91,19 @@
           </basic:Rule>
         <% end -%>
       <% end -%>
+    <% end -%>
+    <% if item.has_key?('exclude_entityids') -%>
+      <basic:Rule xsi:type="basic:NOT">
+        <basic:Rule xsi:type="basic:OR">
+      <% item['exclude_entityids'].each do |entityid| -%>
+          <basic:Rule xsi:type="basic:AttributeRequesterString" value="<%= entityid %>" />
+      <% end -%>
+        </basic:Rule>
+      </basic:Rule>
+    <% end -%>
+    <% if item.has_key?('attribute_filter') \
+        or item.has_key?('exclude_entityids')
+    -%>
       </afp:PolicyRequirementRule>
     <% end -%>
     <% item['attributes'].each do |attribute| -%>
