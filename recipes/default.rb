@@ -180,3 +180,21 @@ Dir.glob("#{node['tomcat']['home']}/lib/*servlet*api*.jar").each do|f|
   end
   break
 end
+
+if node["shibboleth_idp"]["rsyslog_udp_hosts"].length > 0 or node["shibboleth_idp"]["rsyslog_tcp_hosts"].length > 0
+  service "rsyslog" do
+    service_name "#{node['shibboleth_idp']['rsyslog_service']}"
+    action :nothing
+  end
+
+  template "#{node['shibboleth_idp']['rsyslog_conf_dir']}/shibboleth-idp.conf" do
+    source "rsyslog-shibboleth-idp.conf.erb"
+    mode "0644"
+    notifies :restart, "service[rsyslog]"
+  end
+end
+
+link "/var/log/shibboleth" do
+  to "#{node.shibboleth_idp.home}/logs"
+end
+  

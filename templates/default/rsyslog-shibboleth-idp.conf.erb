@@ -1,0 +1,16 @@
+$ModLoad imfile
+$InputFileName <%= node['shibboleth_idp']['home'] %>/logs/idp-audit.log
+$InputFileTag idp-audit:
+$InputFileStateFile idp-audit.state
+$InputFileSeverity notice
+$InputFileFacility <%= node['shibboleth_idp']['rsyslog_facility'] %>
+$InputFilePollInterval <%= node['shibboleth_idp']['rsyslog_poll_interval'] %>
+$InputRunFileMonitor
+
+<% node['shibboleth_idp']['rsyslog_udp_hosts'].each do |host| -%>
+<%= node['shibboleth_idp']['rsyslog_facility'] %>.* @<%= host %>
+<% end -%>
+
+<% node['shibboleth_idp']['rsyslog_tcp_hosts'].each do |host| -%>
+<%= node['shibboleth_idp']['rsyslog_facility'] %>.* @@<%= host %>
+<% end -%>
