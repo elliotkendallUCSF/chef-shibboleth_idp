@@ -67,18 +67,23 @@
     </rp:DefaultRelyingParty>
 
     <% @relyingparties.each do |rp|
+         provider = defprovider
+         pconf = {
+           "SAML2SSOProfile" => {},
+           "ShibbolethSSOProfile" => {},
+           "SAML1AttributeQueryProfile" => {},
+           "SAML1ArtifactResolutionProfile" => {}
+         }
+         skip = true
          if rp.has_key?("provider") and node["shibboleth_idp"]["override_providers"].include?(rp["provider"])
            provider = rp["provider"]
-           pconf = {
-             "SAML2SSOProfile" => {},
-             "ShibbolethSSOProfile" => {},
-             "SAML1AttributeQueryProfile" => {},
-             "SAML1ArtifactResolutionProfile" => {}
-           }
-         elsif rp.has_key?("profile_configuration")
-           provider = defprovider
+           skip = false
+         end
+         if rp.has_key?("profile_configuration")
            pconf = rp["profile_configuration"]
-         else
+           skip = false
+         end
+         if skip
            next
          end
 
