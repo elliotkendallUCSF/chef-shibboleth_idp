@@ -89,8 +89,11 @@ need to use this to be able to connect to an LDAPS server, for example.
 look for metadata files in.  All files will be automatically loaded by the
 IdP.
 
-* `node['shibboleth']['remote_metadata']` - A dictionary of names and URLs
-to pull remote metadata files from.
+* `node['shibboleth']['remote_metadata']` - Data structure defining remote
+sources of metadata.  See the example below for the format.  The
+"signature_cert" attribute allows you to perform validation of the signature
+of the metadata.  It is optional, but if you define it you must also add a
+file with that name to the files directory of this cookbook.
 
 * `node['shibboleth']['ldap_resolvers']` - Data structure defining LDAP
 resolvers.  See the example below for the format.
@@ -175,7 +178,10 @@ Here is an example node configuration:
             }
           },
           "remote_metadata": {
-            "incommon": "http://wayf.incommonfederation.org/InCommon/InCommon-metadata.xml"
+            "incommon": {
+              "url": "http://md.incommon.org/InCommon/InCommon-metadata.xml",
+              "signature_cert": "inc-md-cert.pem"
+            }
           },
           "login_modules": [
             {

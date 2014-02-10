@@ -114,11 +114,16 @@
                                    metadataFile="<%= node["shibboleth_idp"]["home"] %>/metadata/idp-metadata.xml"
                                    maxRefreshDelay="P1D" />
 
-      <% @remotemetadata.each do |name,url| -%>
+      <% @remotemetadata.each do |name,props| -%>
         <metadata:MetadataProvider xsi:type="FileBackedHTTPMetadataProvider" xmlns="urn:mace:shibboleth:2.0:metadata"
           id="_<%= name %>"
-          metadataURL="<%= url %>"
+          metadataURL="<%= props['url'] %>"
           backingFile="<%= node["shibboleth_idp"]["home"] %>/metadata/<%= name %>-metadata.xml">
+          <% if props.has_key?('signature_cert') -%>
+            <metadata:MetadataFilter xsi:type="metadata:SignatureValidation"
+             trustEngineRef="<%= name %>-trustengine"
+             requireSignedMetadata="true" />
+          <% end -%>
         </metadata:MetadataProvider>
       <% end -%>
 
@@ -142,6 +147,16 @@
         <security:PrivateKey><%= node["shibboleth_idp"]["home"] %>/credentials/idp.key</security:PrivateKey>
         <security:Certificate><%= node["shibboleth_idp"]["home"] %>/credentials/idp.crt</security:Certificate>
     </security:Credential>
+
+    <% @remotemetadata.each do |name,props| -%>
+      <% if props.has_key?('signature_cert') -%>
+        <security:TrustEngine id="<%= name %>-trustengine" xsi:type="security:StaticExplicitKeySignature">
+          <security:Credential id="<%= name %>-credential" xsi:type="security:X509Filesystem">
+            <security:Certificate><%= node["shibboleth_idp"]["home"] %>/credentials/<%= props['signature_cert'] %></security:Certificate>
+          </security:Credential>
+        </security:TrustEngine>
+      <% end -%>
+    <% end -%>
     
     <!-- DO NOT EDIT BELOW THIS POINT -->
     <!-- 

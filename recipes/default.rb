@@ -146,6 +146,14 @@ file "#{node['shibboleth_idp']['home']}/credentials/idp.key" do
   notifies :restart, "service[tomcat]"
 end
 
+node["shibboleth_idp"]["remote_metadata"].each do |name,props|
+  if props.has_key?('signature_cert')
+    cookbook_file "#{node['shibboleth_idp']['home']}/credentials/#{props['signature_cert']}" do
+      mode "0644"
+    end
+  end
+end
+
 # Import certificates into the java trusted list. This is necessary to
 # e.g. connect to an LDAPS server
 node["shibboleth_idp"]["trust_certificates"].each do |name,cert|
