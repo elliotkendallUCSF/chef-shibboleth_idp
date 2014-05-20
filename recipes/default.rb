@@ -23,6 +23,21 @@ bash "run_installer" do
   notifies :restart, "service[tomcat]"
 end
 
+# Keep logs outside the main Shibboleth home, since that gets overwritten
+# every time run_installer runs
+directory "/var/log/shibboleth" do
+  owner node["tomcat"]["user"]
+  group node["tomcat"]["group"]
+  mode "0755"
+end
+directory "#{node.shibboleth_idp.home}/logs" do
+  action :delete
+  only_if "test -d #{node.shibboleth_idp.home}/logs"
+end
+link "#{node.shibboleth_idp.home}/logs" do
+  to "/var/log/shibboleth"
+end
+
 # The IdP writes to these, so they should be owned by the Tomcat user
 directory "#{node['shibboleth_idp']["home"]}/logs" do
   owner node["tomcat"]["user"]
@@ -221,8 +236,3 @@ if node["shibboleth_idp"]["rsyslog_udp_hosts"].length > 0 or node["shibboleth_id
     notifies :restart, "service[rsyslog]"
   end
 end
-
-link "/var/log/shibboleth" do
-  to "#{node.shibboleth_idp.home}/logs"
-end
-  
