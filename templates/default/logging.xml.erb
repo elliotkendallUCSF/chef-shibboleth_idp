@@ -39,7 +39,7 @@
 
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
-            <Pattern>%msg%n</Pattern>
+            <Pattern><%= node["shibboleth_idp"]["audit_log_pattern"] %></Pattern>
         </encoder>
     </appender>
 

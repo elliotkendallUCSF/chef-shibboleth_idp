@@ -24,7 +24,7 @@
     <% if node["shibboleth_idp"].has_key?("default_provider")
          defprovider = node["shibboleth_idp"]["default_provider"]
        else
-         defprovider = "https://" + node["shibboleth_idp"]["domain"] + "/idp/shibboleth"
+         defprovider = node["shibboleth_idp"]["entity_id"]
        end
      -%>
     <rp:AnonymousRelyingParty provider="<%= defprovider %>" defaultSigningCredentialRef="IdPCredential"/>

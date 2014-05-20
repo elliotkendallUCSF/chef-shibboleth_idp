@@ -133,9 +133,29 @@ template "#{node['shibboleth_idp']['home']}/conf/attribute-filter.xml" do
   notifies :restart, "service[tomcat]"
 end
 
+if node['shibboleth_idp']['idp_metadata'].nil?
+  # Generate an idp-metadata file
+  template "#{node['shibboleth_idp']['home']}/metadata/idp-metadata.xml" do
+    source "idp-metadata.xml.erb"
+    mode "0644"
+    notifies :restart, "service[tomcat]"
+  end
+else
+  # Use the provided one
+  cookbook_file "#{node['shibboleth_idp']['home']}/metadata/idp-metadata.xml" do
+    source "#{node['shibboleth_idp']['idp_metadata']}"
+    mode "0644"
+    notifies :restart, "service[tomcat]"
+  end
+end
+
 file "#{node['shibboleth_idp']['home']}/credentials/idp.crt" do
   mode "0644"
-  content "#{node['shibboleth_idp']['idp_certificate']}"
+  content <<-EOH
+-----BEGIN CERTIFICATE-----
+#{node['shibboleth_idp']['idp_certificate']}
+-----END CERTIFICATE-----
+EOH
   notifies :restart, "service[tomcat]"
 end
 file "#{node['shibboleth_idp']['home']}/credentials/idp.key" do
